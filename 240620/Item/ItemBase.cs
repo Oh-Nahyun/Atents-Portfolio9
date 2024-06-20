@@ -1,0 +1,62 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ItemBase : RecycleObject
+{
+    /// <summary>
+    /// 1초에 회전하는 속도 ///// (? >> 각도)
+    /// </summary>
+    public float spinSpeed = 360.0f;
+
+    /// <summary>
+    /// 회전시킬 메시의 트랜스폼
+    /// </summary>
+    Transform meshTransform;
+
+    private void Awake()
+    {
+        meshTransform = transform.GetChild(0);
+    }
+
+    private void Update()
+    {
+        meshTransform.Rotate(Time.deltaTime * spinSpeed * Vector3.up, Space.World);
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        StartCoroutine(LifeOver(30)); // 30초 후에 자동으로 사라지기
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // OnItemConsum 실행
+        if (other.CompareTag("Player"))
+        {
+            Player player = other.GetComponent<Player>();
+            if (player != null)
+            {
+                OnItemConsum(player);
+                gameObject.SetActive(false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 아이템을 먹었을 때 실행되는 함수
+    /// </summary>
+    /// <param name="player">아이템을 먹은 플레이어</param>
+    protected virtual void OnItemConsum(Player player)
+    {
+
+    }
+}
+
+/// 실습_240605
+/// 총기 아이템 획득하기
+/// 1. 라이플과 샷건 아이템 만들기
+///     1.1. 획득하면 즉시 무기가 변경됨
+/// 2. 라이플과 샷건을 사용할 때, 총알이 다 떨어지면 기본총으로 변경
+/// 아이템도 풀에 추가하기
